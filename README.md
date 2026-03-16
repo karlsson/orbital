@@ -8,7 +8,7 @@ Build and flash Gleam projects to devices running [AtomVM](https://atomvm.org).
 Add it to your project as a git development dependency by adding the following
 line under `[dev_dependencies]`:
 
-```sh
+```toml
 orbital = { git = "https://github.com/giacomocavalieri/orbital", ref = "v1.0.0" }
 ```
 
