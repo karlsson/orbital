@@ -1,4 +1,4 @@
-# v1.1.0 - unreleased
+# v1.1.0 - 2026-04-05
 
 - Orbital now has a `build` command to allow you to bundle your project into an
   avm file.
