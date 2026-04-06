@@ -6,7 +6,10 @@ import gleam/string
 import gleam_community/ansi
 import hoist.{type ValidatedFlagSpecs}
 
+pub const orbital_version = "v1.1.0"
+
 pub type Command {
+  Version
   Usage
   Help
   Flash(
@@ -50,8 +53,13 @@ pub type Error {
 pub fn parse(args: List(String)) -> Result(Command, Error) {
   let #(parsing_state, result) = parse_args(args)
   case result {
-    // If there's no argument at all we just show the "usage" page.
-    Ok(hoist.Args(arguments: [], flags: _)) -> Ok(Usage)
+    Ok(hoist.Args(arguments: [], flags:)) ->
+      case toggled(flags, "version") {
+        // If there's no argument at all we just show the "usage" page.
+        False -> Ok(Usage)
+        // If the version flag was toggled we show the version.
+        True -> Ok(Version)
+      }
 
     // "help" is pretty straightforward, the parsing done by hoist
     // is plenty enough.
@@ -146,8 +154,11 @@ fn base_flags() -> ValidatedFlagSpecs {
   let assert Ok(base_flags) =
     hoist.validate_flag_specs([
       hoist.new_flag("help")
-      |> hoist.with_short_alias("h")
-      |> hoist.as_toggle,
+        |> hoist.with_short_alias("h")
+        |> hoist.as_toggle,
+      hoist.new_flag("version")
+        |> hoist.with_short_alias("v")
+        |> hoist.as_toggle,
     ])
   base_flags
 }
@@ -238,7 +249,7 @@ fn toggled(flags: List(hoist.Flag), name: String) {
 
 pub fn usage_text() -> Document {
   [
-    doc.from_string(ansi.magenta("⚛️  orbital - v1.0.0")),
+    doc.from_string(ansi.magenta("⚛️  orbital - " <> orbital_version)),
     doc.lines(2),
     doc.from_string(
       ansi.magenta("Usage: ")
@@ -253,6 +264,10 @@ pub fn usage_text() -> Document {
     command_line("  flash  ", "build and flash your code to a device"),
     doc.line,
     command_line("  help   ", "show this help text"),
+    doc.lines(2),
+    doc.from_string(ansi.magenta("Flags:")),
+    doc.line,
+    command_line("  -v, --version  ", "print orbital's version"),
   ]
   |> doc.concat
   |> doc.group
@@ -273,8 +288,9 @@ pub fn flash_help_text(description: Bool) -> Document {
       <> "flash [PLATFORM] <FLAGS>",
     ),
     doc.lines(2),
-    doc.from_string(ansi.magenta("Platforms: ")),
-    command_line("  esp32          ", "this will require `esptool` installed"),
+    doc.from_string(ansi.magenta("Platforms:")),
+    doc.line,
+    command_line("  esp32  ", "this will require `esptool` installed"),
     doc.lines(2),
     doc.from_string(ansi.magenta("Flags:")),
     doc.line,

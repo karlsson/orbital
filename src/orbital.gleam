@@ -45,6 +45,7 @@ pub fn main() -> Nil {
 
     Ok(cli.Usage) -> print_document(cli.usage_text())
     Ok(cli.Help) -> print_document(cli.usage_text())
+    Ok(cli.Version) -> io.println(cli.orbital_version)
     Ok(cli.Flash(help: True, ..)) -> print_document(cli.flash_help_text(True))
     Ok(cli.Flash(help: False, dry_run: True, platform:, port:, baud:)) ->
       flash_dry_run(platform, port, baud)
